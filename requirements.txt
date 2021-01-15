@@ -1,0 +1,5 @@
+setuptools~=49.2.0
+argparse~=1.4.0
+requests~=2.22.0
+PyYAML~=5.3.1
+redis~=3.5.3
