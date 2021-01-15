@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 entry_points = {
     'console_scripts': [
-        'pantheon1 = uploader.pantheon:main'
+        'pantheon = uploader.pantheon:main'
     ]
 }
 
 if __name__ == "__main__":
     setup(
-        name='uploader',
+        name='pantheon-uploader',
         version='0.2',
         packages=find_packages(),
         url='',
