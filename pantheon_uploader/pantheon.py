@@ -641,6 +641,7 @@ def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERV
         status_data.uploaded_data['server'] = create_status_data(server, '503', 'server ' + server + ' is not reachable')
         status_data.uploaded_data['current_status'] = "server error"
         publish_status(use_broker, status_data.uploaded_data)
+        logger.error('server: %s is unreachable', server)
         return False
     _info('Using server: ' + server)
 

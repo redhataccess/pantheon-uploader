@@ -3,6 +3,14 @@
 # Variables
 UPLOADER_HOME=~/.pantheon
 PANTHEON_BIN=~/bin/pantheon
+PANTHEON_BIN_PATH_EXPORTED="export PATH=$PATH:$HOME/bin"
+
+if ! grep -q "$PANTHEON_BIN_PATH_EXPORTED" "$HOME/.bashrc" ; then
+  echo "in if"
+  cp ~/.bashrc ~/.bashrc_bak
+  echo "$PANTHEON_BIN_PATH_EXPORTED" >> ~/.bashrc
+  source ~/.bashrc
+fi
 
 # Create UPLOADER_HOME directory if not exists
 if [ ! -d "$UPLOADER_HOME" ]; then
@@ -12,8 +20,8 @@ fi
 
 # Download the pantheon-pantheon_uploader script to $UPLOADER_HOME
 echo "Downloading the uploader script to $UPLOADER_HOME"
-curl -o ${UPLOADER_HOME}/pantheon.py https://raw.githubusercontent.com/redhataccess/uploader/master/uploader/pantheon.py
-curl -o ${UPLOADER_HOME}/requirements.txt https://raw.githubusercontent.com/redhataccess/uploader/master/requirements.txt
+curl -o ${UPLOADER_HOME}/pantheon.py https://raw.githubusercontent.com/redhataccess/pantheon-uploader/master/pantheon_uploader/pantheon.py
+curl -o ${UPLOADER_HOME}/requirements.txt https://raw.githubusercontent.com/redhataccess/pantheon-uploader/master/requirements.txt
 
 pip3 install --user -r ${UPLOADER_HOME}/requirements.txt
 
