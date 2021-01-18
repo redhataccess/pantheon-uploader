@@ -10,7 +10,7 @@ if [ ! -d "$UPLOADER_HOME" ]; then
   mkdir -p $UPLOADER_HOME
 fi
 
-# Download the uploader script to $UPLOADER_HOME
+# Download the pantheon-pantheon_uploader script to $UPLOADER_HOME
 echo "Downloading the uploader script to $UPLOADER_HOME"
 curl -o ${UPLOADER_HOME}/pantheon.py https://raw.githubusercontent.com/redhataccess/uploader/master/uploader/pantheon.py
 curl -o ${UPLOADER_HOME}/requirements.txt https://raw.githubusercontent.com/redhataccess/uploader/master/requirements.txt

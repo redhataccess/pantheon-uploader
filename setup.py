@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 entry_points = {
     'console_scripts': [
-        'pantheon = uploader.pantheon:main'
+        'pantheon = pantheon_uploader.pantheon:main'
     ]
 }
 

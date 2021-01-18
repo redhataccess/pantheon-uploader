@@ -495,7 +495,7 @@ def create_args():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='''\
     Red Hat bulk upload module for Pantheon 2. This tool will scan a directory recursively and upload relevant files.
 
-    Both this uploader and Pantheon 2 are ALPHA software and features may update or change over time.
+    Both this pantheon-uploader and Pantheon 2 are ALPHA software and features may update or change over time.
 
     ''')
     parser.add_argument('push', nargs='+', help='Type of operation, default push')
@@ -522,7 +522,7 @@ def create_args():
     parser.add_argument('--sample', '-S',
                         help='Print a sample pantheon2.yml file to stdout (which you may want to redirect to a file).',
                         action='version', version='''\
-    # Config file for Pantheon v2 uploader
+    # Config file for Pantheon v2 pantheon-uploader
     ## server: Pantheon server URL
     ## repository: a unique name, which is visible in the user facing URL
 
