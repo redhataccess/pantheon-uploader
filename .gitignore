@@ -1,5 +1,5 @@
 .idea/
 
-/build/
-/dist/
-/pantheon_uploader.egg-info/
+build/
+dist/
+pantheon_uploader.egg-info/
