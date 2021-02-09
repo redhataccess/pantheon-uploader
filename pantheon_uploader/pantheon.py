@@ -161,7 +161,7 @@ def process_file(path, filetype, server, sandbox, repository, directory, dry, us
     isResource = True if filetype == 'resources' else False
     isAssembly = True if filetype == 'assemblies' else False
 
-    content_root = 'sandbox' if sandbox else 'repositories'
+    content_root = 'sandbox' if sandbox else 'docs' if repository == 'Pantheon' else 'repositories'
     url = server + '/content/' + content_root + '/' + repository + '/entities'
 
     path = PurePath(path)
@@ -309,7 +309,7 @@ def process_workspace(path, server, sandbox, repository, variants, user, pw, dry
     Parameter:
     path: string
     """
-    content_root = 'sandbox' if sandbox else 'repositories'
+    content_root = 'sandbox' if sandbox else 'docs' if repository == 'Pantheon' else 'repositories'
     url = server + '/content/' + content_root + '/' + repository
 
     # Populate payload
