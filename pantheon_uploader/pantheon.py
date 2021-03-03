@@ -303,7 +303,7 @@ def process_module(base_name, dry, path, pw, url, user, status_data:Data):
         _print_response('module', path, r.status_code, r.text)
 
 
-def process_workspace(path, server, sandbox, repository, variants, user, pw, dry, status_data:Data):
+def process_workspace(local_directory, path, server, sandbox, repository, variants, user, pw, dry, status_data:Data):
     """
     Set up module_variants for the repository.
     Parameter:
@@ -322,7 +322,7 @@ def process_workspace(path, server, sandbox, repository, variants, user, pw, dry
 
     data = {}
     if variants:
-        if not validateVariants(variants, status_data):
+        if not validateVariants(variants,local_directory, status_data):
             return "Variants are not valid"
 
         for variant in variants:
@@ -352,7 +352,7 @@ Method to validate variants attributes
 """
 
 
-def validateVariants(variants, status_data:Data):
+def validateVariants(variants, local_directory, status_data:Data):
     isCanon = False
     isCannonicalList = []
     variantNameList = []
@@ -368,7 +368,10 @@ def validateVariants(variants, status_data:Data):
             status_data.uploaded_data['other_status'].append(
                 create_status_data(variants, 400, "Variant (path) missing, please correct variant path "))
             return False
-
+        if not os.path.exists(local_directory+"/"+variant['path']):
+            status_data.uploaded_data['other_status'].append(
+                create_status_data(variants, 400, "Variant (path) missing does not exist, please correct variant path "))
+            return False
         if 'canonical' in variant:
             if variant['canonical'] is not None:
                 isCannonicalList.append(variant['canonical'])
@@ -663,7 +666,7 @@ def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERV
             variants = []
         _info('Using ' + mode + ': ' + repository)
         print('--------------')
-        err = process_workspace(repository, server, sandbox, repository, variants, user, pw, dry, status_data)
+        err = process_workspace(directory, repository, server, sandbox, repository, variants, user, pw, dry, status_data)
         if err is not None:
             status_data.uploaded_data['other_status'].append(create_status_data(repository, get_status(err),
                                                                      'Either workspace or variant could not be '
