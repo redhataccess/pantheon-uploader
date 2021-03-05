@@ -303,7 +303,7 @@ def process_module(base_name, dry, path, pw, url, user, status_data:Data):
         _print_response('module', path, r.status_code, r.text)
 
 
-def process_workspace(path, server, sandbox, repository, variants, user, pw, dry, status_data:Data):
+def process_workspace(local_directory, path, server, sandbox, repository, variants, user, pw, dry, status_data:Data):
     """
     Set up module_variants for the repository.
     Parameter:
@@ -322,7 +322,7 @@ def process_workspace(path, server, sandbox, repository, variants, user, pw, dry
 
     data = {}
     if variants:
-        if not validateVariants(variants, status_data):
+        if not validateVariants(variants,local_directory, status_data):
             return "Variants are not valid"
 
         for variant in variants:
@@ -352,7 +352,7 @@ Method to validate variants attributes
 """
 
 
-def validateVariants(variants, status_data:Data):
+def validateVariants(variants, local_directory, status_data:Data):
     isCanon = False
     isCannonicalList = []
     variantNameList = []
@@ -362,13 +362,19 @@ def validateVariants(variants, status_data:Data):
             'name'] is None:  # name is mandatory for variant, throw errors in case of missing
             status_data.uploaded_data['other_status'].append(
                 create_status_data(variants, 400, "Variant (name) missing, please correct variant name "))
+            _error("Variant (name) missing, please correct variant name ")
             return False
         if 'path' not in variant or variant[
             'path'] is None:  # path is mandatory for variant, throw errors in case of missing
             status_data.uploaded_data['other_status'].append(
                 create_status_data(variants, 400, "Variant (path) missing, please correct variant path "))
+            _error("Variant (path) missing, please correct variant path ")
             return False
-
+        if not os.path.exists(local_directory+"/"+variant['path']):
+            status_data.uploaded_data['other_status'].append(
+                create_status_data(variants, 400, "Variant (path) does not exist, please correct variant path "))
+            _error("Variant (path) does not exist, please correct variant path ")
+            return False
         if 'canonical' in variant:
             if variant['canonical'] is not None:
                 isCannonicalList.append(variant['canonical'])
@@ -377,6 +383,8 @@ def validateVariants(variants, status_data:Data):
                     create_status_data(variants, 400,
                                        "Cannonical (Value) missing, please correct Cannonical value for " + variant[
                                            'name']))
+                _error("Cannonical (Value) missing, please correct Cannonical value for " + variant[
+                                           'name'])
                 return False
 
     for value in isCannonicalList:
@@ -389,16 +397,19 @@ def validateVariants(variants, status_data:Data):
                 status_data.uploaded_data['other_status'].append(
                     create_status_data(variants, 400,
                                        'Multiple Canonical attribute present, Only one variant can be Cannonical'))
+                _error("Multiple Canonical attribute present, Only one variant can be Cannonical")
                 return False
         else:
             status_data.uploaded_data['other_status'].append(
                 create_status_data(variants, 400,
                                    'Canonical Attribute takes only boolean values.'))
+            _error("Canonical Attribute takes only boolean values.")
             return False
     if len(variants) > 1 and not isCanon:
         status_data.uploaded_data['other_status'].append(
             create_status_data(variants, 400,
                                'Canonical attribute missing, Should be present in case multiple variants'))
+        _error("Canonical attribute missing, Should be present in case multiple variants")
         return False
     return True
 
@@ -663,7 +674,7 @@ def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERV
             variants = []
         _info('Using ' + mode + ': ' + repository)
         print('--------------')
-        err = process_workspace(repository, server, sandbox, repository, variants, user, pw, dry, status_data)
+        err = process_workspace(directory, repository, server, sandbox, repository, variants, user, pw, dry, status_data)
         if err is not None:
             status_data.uploaded_data['other_status'].append(create_status_data(repository, get_status(err),
                                                                      'Either workspace or variant could not be '
