@@ -362,15 +362,18 @@ def validateVariants(variants, local_directory, status_data:Data):
             'name'] is None:  # name is mandatory for variant, throw errors in case of missing
             status_data.uploaded_data['other_status'].append(
                 create_status_data(variants, 400, "Variant (name) missing, please correct variant name "))
+            _error("Variant (name) missing, please correct variant name ")
             return False
         if 'path' not in variant or variant[
             'path'] is None:  # path is mandatory for variant, throw errors in case of missing
             status_data.uploaded_data['other_status'].append(
                 create_status_data(variants, 400, "Variant (path) missing, please correct variant path "))
+            _error("Variant (path) missing, please correct variant path ")
             return False
         if not os.path.exists(local_directory+"/"+variant['path']):
             status_data.uploaded_data['other_status'].append(
-                create_status_data(variants, 400, "Variant (path) missing does not exist, please correct variant path "))
+                create_status_data(variants, 400, "Variant (path) does not exist, please correct variant path "))
+            _error("Variant (path) does not exist, please correct variant path ")
             return False
         if 'canonical' in variant:
             if variant['canonical'] is not None:
@@ -380,6 +383,8 @@ def validateVariants(variants, local_directory, status_data:Data):
                     create_status_data(variants, 400,
                                        "Cannonical (Value) missing, please correct Cannonical value for " + variant[
                                            'name']))
+                _error("Cannonical (Value) missing, please correct Cannonical value for " + variant[
+                                           'name'])
                 return False
 
     for value in isCannonicalList:
@@ -392,16 +397,19 @@ def validateVariants(variants, local_directory, status_data:Data):
                 status_data.uploaded_data['other_status'].append(
                     create_status_data(variants, 400,
                                        'Multiple Canonical attribute present, Only one variant can be Cannonical'))
+                _error("Multiple Canonical attribute present, Only one variant can be Cannonical")
                 return False
         else:
             status_data.uploaded_data['other_status'].append(
                 create_status_data(variants, 400,
                                    'Canonical Attribute takes only boolean values.'))
+            _error("Canonical Attribute takes only boolean values.")
             return False
     if len(variants) > 1 and not isCanon:
         status_data.uploaded_data['other_status'].append(
             create_status_data(variants, 400,
                                'Canonical attribute missing, Should be present in case multiple variants'))
+        _error("Canonical attribute missing, Should be present in case multiple variants")
         return False
     return True
 
