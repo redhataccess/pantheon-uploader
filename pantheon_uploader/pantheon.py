@@ -602,7 +602,7 @@ def log_options(directory, dry, logStr, numeric_level, repository, server, use_b
     _info("Using repository:" + str(repository))
     _info("Using directory:" + str(directory))
     _info("Using broker:" + str(use_broker))
-    _info("Using broker:" + str(channel))
+    _info("Using channel:" + str(channel))
 
 
 # ToDo: find a better way to handle variants validation
@@ -686,8 +686,8 @@ def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERV
                                                                      'created because of {0}'.format(
                                                                          err)))
             logger.warning('Either workspace or variant could not be created because of {0}'.format(err))
+            status_data.uploaded_data['current_status'] = "error"
             publish_status(use_broker, status_data.uploaded_data)
-            status_data.uploaded_data['current_status']= "error"
             return False
         attribute_files = []
         if variants:
