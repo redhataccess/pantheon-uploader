@@ -205,7 +205,6 @@ def process_file(path, filetype, server, sandbox, repository, directory, dry, us
         status_data.uploaded_data['type_uploading'] = 'assembly'
         process_assembly(base_name, dry, path, pw, url, user, status_data)
         publish_status(should_publish, status_data.uploaded_data)
-    status_data.uploaded_data['last_file_uploaded'] = str(path)
     logger.debug('')
 
 
@@ -225,6 +224,7 @@ def process_assembly(base_name, dry, path, pw, url, user, status_data:Data):
         else:
             status_data.uploaded_data['assemblies'].append(create_status_data(path, r.status_code, r.text))
         _print_response('assembly', path, r.status_code, r.text)
+        status_data.uploaded_data['last_file_uploaded'] = str(path)
 
 
 def publish_status(should_publish, processed_data):
@@ -277,6 +277,7 @@ def process_resource(dry, path, pw, url, user, status_data:Data):
             else:
                 status_data.uploaded_data['resources'].append(create_status_data(path, r.status_code, r.text))
             _print_response('resource', path, r.status_code, r.text)
+            status_data.uploaded_data['last_file_uploaded'] = str(path)
 
 
 def process_module(base_name, dry, path, pw, url, user, status_data:Data):
@@ -301,6 +302,7 @@ def process_module(base_name, dry, path, pw, url, user, status_data:Data):
             status_data.uploaded_data['modules'].append(create_status_data(path, r.status_code, r.text))
         # print the response content received from Pantheon, not just reason
         _print_response('module', path, r.status_code, r.text)
+        status_data.uploaded_data['last_file_uploaded'] = str(path)
 
 
 def process_workspace(local_directory, path, server, sandbox, repository, variants, user, pw, dry, status_data:Data):
@@ -591,7 +593,7 @@ def main():
     start_process(numeric_level, pw, directory, server, user, repository, sandbox, dry, attrFile, use_broker)
 
 
-def log_options(directory, dry, logStr, numeric_level, repository, server, use_broker, user):
+def log_options(directory, dry, logStr, numeric_level, repository, server, use_broker, user, channel=''):
     _info("Using user:" + str(user))
     _info("Using dry:" + str(dry))
     _info("Using server:" + str(server))
@@ -600,6 +602,7 @@ def log_options(directory, dry, logStr, numeric_level, repository, server, use_b
     _info("Using repository:" + str(repository))
     _info("Using directory:" + str(directory))
     _info("Using broker:" + str(use_broker))
+    _info("Using channel:" + str(channel))
 
 
 # ToDo: find a better way to handle variants validation
@@ -613,15 +616,15 @@ def setup_broker(channel):
     broker = redis.Redis(decode_responses=True)
     broker.pubsub()
     # channel_name is global and hence can be set from outside
-    channel_name = channel if channel_name == 'default' else channel_name
+    channel_name = channel
 
 
 def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERVER, user=None, repository=None,
                   sandbox=None
-                  , dry=None, attrFile=None, use_broker=False):
+                  , dry=None, attrFile=None, use_broker=False, channel=''):
     # log the parameter values. logStr is send as empty string as
     # log level is indicated by numeric_level
-    log_options(directory, dry, '', numeric_level, repository, server, use_broker, user)
+    log_options(directory, dry, '', numeric_level, repository, server, use_broker, user, channel)
     # initialize status update ds
     status_data = Data()
     set_logger(numeric_level)
@@ -636,12 +639,14 @@ def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERV
     except FileNotFoundError:
         logger.warning(
             'Could not find a valid config file(' + CONFIG_FILE + ') in this directory; all files will be treated as resource uploads.')
+        status_data.uploaded_data['other_status'].append(
+            create_status_data("config file error", 400, 'Could not find a valid config file(' + CONFIG_FILE + ') in this directory; all files will be treated as resource uploads.'))
     logger.debug('config: %s', config)
 
     repository = resolveOption(repository, '', config['repository'], config) if repository is None else repository
-
+    channel = channel if channel is not '' else repository
     if use_broker:
-        setup_broker(repository)
+        setup_broker(channel)
 
     server = resolveOption(server, 'server', DEFAULT_SERVER, config)
     # Check if server url path reachable
@@ -681,8 +686,8 @@ def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERV
                                                                      'created because of {0}'.format(
                                                                          err)))
             logger.warning('Either workspace or variant could not be created because of {0}'.format(err))
+            status_data.uploaded_data['current_status'] = "error"
             publish_status(use_broker, status_data.uploaded_data)
-            status_data.uploaded_data['current_status']= "error"
             return False
         attribute_files = []
         if variants:
