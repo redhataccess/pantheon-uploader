@@ -593,7 +593,8 @@ def main():
     start_process(numeric_level, pw, directory, server, user, repository, sandbox, dry, attrFile, use_broker)
 
 
-def log_options(directory, dry, logStr, numeric_level, repository, server, use_broker, user, channel=''):
+def log_options(directory, dry, logStr, numeric_level, repository, server, use_broker, user, channel='',
+                broker_host='localhost'):
     _info("Using user:" + str(user))
     _info("Using dry:" + str(dry))
     _info("Using server:" + str(server))
@@ -603,6 +604,7 @@ def log_options(directory, dry, logStr, numeric_level, repository, server, use_b
     _info("Using directory:" + str(directory))
     _info("Using broker:" + str(use_broker))
     _info("Using channel:" + str(channel))
+    _info("Using broker host:" + str(broker_host))
 
 
 # ToDo: find a better way to handle variants validation
@@ -610,10 +612,10 @@ def get_status(err):
     return 400 if "valid" in err else 500
 
 
-def setup_broker(channel):
+def setup_broker(channel, broker_host='localhost'):
     import redis
     global broker, channel_name
-    broker = redis.Redis(decode_responses=True)
+    broker = redis.Redis(broker_host, decode_responses=True)
     broker.pubsub()
     # channel_name is global and hence can be set from outside
     channel_name = channel
@@ -621,10 +623,10 @@ def setup_broker(channel):
 
 def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERVER, user=None, repository=None,
                   sandbox=None
-                  , dry=None, attrFile=None, use_broker=False, channel=''):
+                  , dry=None, attrFile=None, use_broker=False, broker_host='localhost', channel=''):
     # log the parameter values. logStr is send as empty string as
     # log level is indicated by numeric_level
-    log_options(directory, dry, '', numeric_level, repository, server, use_broker, user, channel)
+    log_options(directory, dry, '', numeric_level, repository, server, use_broker, user, channel, broker_host)
     # initialize status update ds
     status_data = Data()
     set_logger(numeric_level)
@@ -646,7 +648,7 @@ def start_process(numeric_level=30, pw=None, directory=None, server=DEFAULT_SERV
     repository = resolveOption(repository, '', config['repository'], config) if repository is None else repository
     channel = channel if channel is not '' else repository
     if use_broker:
-        setup_broker(channel)
+        setup_broker(channel, broker_host)
 
     server = resolveOption(server, 'server', DEFAULT_SERVER, config)
     # Check if server url path reachable
